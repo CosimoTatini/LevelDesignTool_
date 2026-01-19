@@ -66,7 +66,7 @@ public class LeveldDesignWindow : EditorWindow
         randomize = EditorGUILayout.Toggle(new GUIContent("Randomize dimension/position"), randomize);
         EditorGUILayout.Space();
         GUILayout.Label("Multi-Level Settings", EditorStyles.boldLabel);
-        floorNumbers = EditorGUILayout.IntField("Number of floors", floorNumbers);
+        floorNumbers = EditorGUILayout.IntField("Number of floors", floorNumbers);//Set Floors Numbers
 
         if (floorNumbers < 1)
         {
