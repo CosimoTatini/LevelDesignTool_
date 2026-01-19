@@ -1,7 +1,6 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using System.Collections.Generic;
-using UnityEngine.Rendering.Universal;
 
 public class LeveldDesignWindow : EditorWindow
 {
@@ -15,11 +14,11 @@ public class LeveldDesignWindow : EditorWindow
     private ShapeType typology = ShapeType.Room;
     private int elementNumber = 1;
 
-    // Dimensioni di default
+
     private float roomWidth = 5f;
     private float roomDepth = 5f;
-    private float corridorWidth = 2f;  // X axis (solitamente stretto)
-    private float corridorLength = 8f; // Z axis (solitamente lungo)
+    private float corridorWidth = 2f;
+    private float corridorLength = 8f;
 
     private bool randomize = false;
     private enum RotationType { Fixed, Randomic, North_0, East_90, South_180, West_270 }
@@ -48,7 +47,7 @@ public class LeveldDesignWindow : EditorWindow
             elementNumber = 1;
         }
 
-        // --- SEZIONE DIMENSIONI CORRETTA ---
+
         if (typology == ShapeType.Room)
         {
             GUILayout.Label("Room Dimensions (Local Scale)", EditorStyles.boldLabel);
@@ -58,31 +57,31 @@ public class LeveldDesignWindow : EditorWindow
         else
         {
             GUILayout.Label("Corridor Dimensions (Local Scale)", EditorStyles.boldLabel);
-            // Corretto: La larghezza è X, la lunghezza è Z
+
             corridorWidth = EditorGUILayout.FloatField("Width (X Axis)", corridorWidth);
             corridorLength = EditorGUILayout.FloatField("Length (Z Axis)", corridorLength);
         }
-        // ------------------------------------
+
 
         randomize = EditorGUILayout.Toggle(new GUIContent("Randomize dimension/position"), randomize);
         EditorGUILayout.Space();
         GUILayout.Label("Multi-Level Settings", EditorStyles.boldLabel);
         floorNumbers = EditorGUILayout.IntField("Number of floors", floorNumbers);
 
-        if(floorNumbers < 1)
+        if (floorNumbers < 1)
         {
             floorNumbers = 1;
         }
-        if(floorNumbers>1)
+        if (floorNumbers > 1)
         {
-            floorsOffsetY=EditorGUILayout.FloatField("Floor offset",floorsOffsetY);
+            floorsOffsetY = EditorGUILayout.FloatField("Floor offset", floorsOffsetY); //Set Floor Offset
             if (floorsOffsetY < 0.1f) floorsOffsetY = 0.1f;
         }
 
 
         EditorGUILayout.Space();
-        GUILayout.Label("Rotation Settings", EditorStyles.boldLabel);
-        rotationType = (RotationType)EditorGUILayout.EnumPopup(new GUIContent("Rotation Type", "Choose how object should be rotated"), rotationType);
+        GUILayout.Label("Rotation Settings", EditorStyles.boldLabel); 
+        rotationType = (RotationType)EditorGUILayout.EnumPopup(new GUIContent("Rotation Type", "Choose how object should be rotated"), rotationType); //Set Rotation Type
 
         string rotationInfo = "";
 
@@ -112,7 +111,7 @@ public class LeveldDesignWindow : EditorWindow
 
         EditorGUILayout.Space();
         GUILayout.Label("Grid Settings", EditorStyles.boldLabel);
-        snapToGrid = EditorGUILayout.Toggle(new GUIContent("Snap To Grid", "Enable snapping objects to grid"), snapToGrid);
+        snapToGrid = EditorGUILayout.Toggle(new GUIContent("Snap To Grid", "Enable snapping objects to grid"), snapToGrid);  //Set Snap To Grid Mode
 
         if (snapToGrid)
         {
@@ -146,6 +145,8 @@ public class LeveldDesignWindow : EditorWindow
         }
 
         EditorGUILayout.Space();
+
+        //Alignment Tools Section
         GUILayout.Label("Alignement Tools", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox("Select object in the generated layout to align them", MessageType.Info);
 
@@ -169,6 +170,10 @@ public class LeveldDesignWindow : EditorWindow
 
     }
 
+    /// <summary>
+    /// Method to align object by X or Z
+    /// </summary>
+    
     private void AlignObjects(bool alignX, bool alignZ)
     {
         GameObject layoutParent = GameObject.Find("Generated Layout");
@@ -181,20 +186,20 @@ public class LeveldDesignWindow : EditorWindow
 
 
 
-        List<Transform> allChildrens= new List<Transform>();
+        List<Transform> allChildrens = new List<Transform>();
 
         foreach (Transform floor in layoutParent.transform)
         {
-            if(floor.name.StartsWith("Floor_"))
+            if (floor.name.StartsWith("Floor_"))
             {
-                foreach(Transform child in floor)
+                foreach (Transform child in floor)
                 {
                     allChildrens.Add(child);
                 }
 
             }
         }
-        Transform[] childrens= allChildrens.ToArray();
+        Transform[] childrens = allChildrens.ToArray();
 
 
 
@@ -238,6 +243,10 @@ public class LeveldDesignWindow : EditorWindow
         Debug.Log($"Aligned {childrens.Length} objects. Avg X: {averageX:F2}, Avg Z: {averageZ:F2}");
     }
 
+    /// <summary>
+    /// Distribute objects 
+    /// </summary>
+
     private void DistributeObjects()
     {
         GameObject layoutParent = GameObject.Find("Generated Layout");
@@ -248,20 +257,20 @@ public class LeveldDesignWindow : EditorWindow
             return;
         }
 
-        List<Transform> allChildren= new List<Transform>();
+        List<Transform> allChildren = new List<Transform>();
 
-        foreach(Transform floor in layoutParent.transform)
+        foreach (Transform floor in layoutParent.transform)
         {
             if (floor.name.StartsWith("Floor_"))
             {
-                foreach(Transform child in floor)
+                foreach (Transform child in floor)
                 {
                     allChildren.Add(child);
                 }
 
             }
         }
-        Transform[] childrens= allChildren.ToArray();
+        Transform[] childrens = allChildren.ToArray();
 
         for (int i = 0; i < layoutParent.transform.childCount; i++)
         {
@@ -330,7 +339,7 @@ public class LeveldDesignWindow : EditorWindow
                 yRotation = -180f;
                 break;
             case RotationType.West_270:
-                yRotation = yRotation+270f;
+                yRotation = yRotation + 270f;
                 break;
         }
         return Quaternion.Euler(0, yRotation, 0);
@@ -347,105 +356,97 @@ public class LeveldDesignWindow : EditorWindow
         {
             Undo.DestroyObjectImmediate(previous);
         }
-
         GameObject parent = new GameObject("Generated Layout");
         Undo.RegisterCreatedObjectUndo(parent, "Generate Layout");
-
-        for( int floorIndex=0; floorIndex<floorNumbers;floorIndex++)
+        for (int floorIndex = 0; floorIndex < floorNumbers; floorIndex++)
         {
+
             GameObject floorParent = new GameObject($"Floor_{floorIndex + 1}");
-            floorParent.transform
-        }
+            floorParent.transform.SetParent(parent.transform);
+            Undo.RegisterCreatedObjectUndo(floorParent, $"Create Floor {floorIndex + 1}");
 
-        float baseWidth;
-        float baseDepth;
 
-        // Logica corretta: Width va sempre su X, Depth/Length va sempre su Z
-        if (typology == ShapeType.Room)
-        {
-            baseWidth = roomWidth;
-            baseDepth = roomDepth;
-        }
-        else
-        {
-            baseWidth = corridorWidth;
-            baseDepth = corridorLength;
-        }
+            float currentYOffset = floorIndex * floorsOffsetY;
 
-        // Calcolo per lo spacing in modalità griglia
-        float maxDim = Mathf.Max(baseWidth, baseDepth);
-        float rangePos = elementNumber * maxDim * 1.5f;
-
-        for (int i = 0; i < elementNumber; i++)
-        {
-            GameObject newGameObject;
+            float baseWidth;
+            float baseDepth;
 
             if (typology == ShapeType.Room)
             {
-                if (roomPrefab != null)
-                {
-                    newGameObject = (GameObject)PrefabUtility.InstantiatePrefab(roomPrefab);
-                }
-                else
-                {
-                    newGameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                }
-                newGameObject.name = "Room" + (i + 1);
+                baseWidth = roomWidth;
+                baseDepth = roomDepth;
             }
             else
             {
-                if (corridorPrefab != null)
+                baseWidth = corridorWidth;
+                baseDepth = corridorLength;
+            }
+
+
+            float maxDim = Mathf.Max(baseWidth, baseDepth);
+            float rangePos = elementNumber * maxDim * 1.5f;
+
+
+            for (int i = 0; i < elementNumber; i++)
+            {
+                GameObject newGameObject;
+
+
+                if (typology == ShapeType.Room)
                 {
-                    newGameObject = (GameObject)PrefabUtility.InstantiatePrefab(corridorPrefab);
+                    GameObject prefabToUse = (roomPrefab != null) ? roomPrefab : GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    newGameObject = (GameObject)PrefabUtility.InstantiatePrefab(prefabToUse);
+                    newGameObject.name = "Room" + (i + 1);
                 }
                 else
                 {
-                    newGameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject prefabToUse = (corridorPrefab != null) ? corridorPrefab : GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    newGameObject = (GameObject)PrefabUtility.InstantiatePrefab(prefabToUse);
+                    newGameObject.name = "Corridor" + (i + 1);
                 }
-                newGameObject.name = "Corridor" + (i + 1);
+
+
+                newGameObject.transform.SetParent(floorParent.transform);
+                Undo.RegisterCreatedObjectUndo(newGameObject, "Create Layout Element");
+
+
+                newGameObject.transform.rotation = GetRotation();
+
+
+                Vector3 position = Vector3.zero;
+
+                if (randomize)
+                {
+                    position.x = UnityEngine.Random.Range(-rangePos, rangePos);
+                    position.z = UnityEngine.Random.Range(-rangePos, rangePos);
+                }
+                else
+                {
+                    int columns = Mathf.CeilToInt(Mathf.Sqrt(elementNumber));
+                    int row = i / columns;
+                    int column = i % columns;
+                    position.x = column * (maxDim + 2f);
+                    position.z = row * (maxDim + 2f);
+                }
+
+
+                position.y = currentYOffset;
+                position = SnaptoGrid(position);
+
+                newGameObject.transform.position = position;
+
+
+                float width = baseWidth;
+                float depth = baseDepth;
+
+                if (randomize)
+                {
+                    width *= UnityEngine.Random.Range(0.5f, 1.5f);
+                    depth *= UnityEngine.Random.Range(0.5f, 1.5f);
+                }
+
+                newGameObject.transform.localScale = new Vector3(width, 1f, depth);
             }
-
-            Undo.RegisterCreatedObjectUndo(newGameObject, "Create Layout");
-            newGameObject.transform.SetParent(parent.transform);
-
-            // 1. ROTAZIONE: La applichiamo subito
-            newGameObject.transform.rotation = GetRotation();
-
-            // 2. POSIZIONE
-            Vector3 position = Vector3.zero;
-
-            if (randomize)
-            {
-                position.x = UnityEngine.Random.Range(-rangePos, rangePos);
-                position.z = UnityEngine.Random.Range(-rangePos, rangePos);
-            }
-            else
-            {
-                int columns = Mathf.CeilToInt(Mathf.Sqrt(elementNumber));
-                int row = i / columns;
-                int column = i % columns;
-                // Spaziamo in base alle dimensioni originali + un piccolo margine
-                position.x = column * (maxDim + 2f);
-                position.z = row * (maxDim + 2f);
-            }
-
-            position.y = 0f;
-            position = SnaptoGrid(position);
-            newGameObject.transform.position = position;
-
-            // 3. DIMENSIONE (LOCAL SCALE)
-            // Applichiamo la dimensione locale. Essendo locale, se l'oggetto è ruotato,
-            // la larghezza (Width) seguirà l'asse rosso locale dell'oggetto.
-            float width = baseWidth;
-            float depth = baseDepth;
-
-            if (randomize)
-            {
-                width *= UnityEngine.Random.Range(0.5f, 1.5f);
-                depth *= UnityEngine.Random.Range(0.5f, 1.5f);
-            }
-
-            newGameObject.transform.localScale = new Vector3(width, 1f, depth);
         }
     }
 
